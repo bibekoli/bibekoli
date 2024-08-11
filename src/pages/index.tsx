@@ -15,7 +15,8 @@ export default function Home() {
           <p>
             I am a full stack developer with experience in TypeScript, Next.js,
             React.js, and MongoDB. I am passionate about creating user-friendly
-            applications with a focus on performance and accessibility.
+            applications with a focus on performance and accessibility. I am currently
+            studying BCA at Mechi Multiple Campus.
           </p>
           <br />
           <h2 className="text-2xl font-semibold mb-4">Skills</h2>
