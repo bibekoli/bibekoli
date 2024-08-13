@@ -23,7 +23,6 @@ export default function Home() {
           <ul className="list-disc pl-5">
             <li className="text-lg mb-2">TypeScript</li>
             <li className="text-lg mb-2">Next.js</li>
-            <li className="text-lg mb-2">React.js</li>
             <li className="text-lg mb-2">MongoDB</li>
             <li className="text-lg mb-2">Tailwind CSS</li>
             <li className="text-lg mb-2">Material-UI</li>
