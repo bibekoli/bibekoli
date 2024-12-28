@@ -87,7 +87,7 @@ export default function Skills() {
   ];
 
   return (
-    <div className="m-4 mt-8 rounded-2xl" id="skills-section">
+    <div className="m-4 p-4 bg-white mt-6 rounded-2xl" id="skills-section">
       <h1 className="text-3xl font-bold text-center mb-6">Skills</h1>
       {
         skillGroups.map((group, index) => (
