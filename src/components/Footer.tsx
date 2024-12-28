@@ -27,7 +27,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-quaternary text-primary py-12 pb-[100px] md:pb-[110px]">
-      <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0">
+      <div className="max-w-screen-xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0">
         {/* Personal Info */}
         <div className="text-center md:text-left">
           <h3 className="text-2xl font-semibold">Bibek Oli</h3>

@@ -33,8 +33,8 @@ export default function Home() {
           <Skills />
           <Projects />
           <Contact />
-          <Footer />
         </div>
+        <Footer />
       </main>
     </>
   );
