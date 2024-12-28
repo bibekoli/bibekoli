@@ -3,7 +3,6 @@ import Link from "next/link";
 import { useState } from "react";
 
 export default function Contact() {
-  const [submissionStatus, setSubmissionStatus] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -39,29 +38,8 @@ export default function Contact() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    if (!formData.name || !formData.email || !formData.message) {
-      setSubmissionStatus("error");
-      return;
-    }
-
-    setSubmissionStatus("pending");
-    const form = event.target as HTMLFormElement;
-    const data = new FormData(form);
-
-    fetch("/", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams(data as any).toString(),
-    })
-      .then(() => {
-        setSubmissionStatus("success");
-        setFormData({ name: "", email: "", message: "" });
-      })
-      .catch(() => setSubmissionStatus("error"))
-      .finally(() => {
-        setTimeout(() => setSubmissionStatus(""), 3000);
-      });
+    const mailUrl = `mailto:hello@bibekoli.com?subject=New Message from ${formData.name} (${formData.email})&body=${formData.message}`;
+    window.open(mailUrl);
   };
 
   return (
@@ -175,19 +153,8 @@ export default function Contact() {
 
           <button
             type="submit"
-            className={`w-full bg-quaternary text-white py-3 px-6 rounded-md transition-colors ${
-              submissionStatus === "pending"
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-opacity-70"
-            }`}
-            disabled={submissionStatus === "pending"}>
-            {submissionStatus === "pending"
-              ? "Sending..."
-              : submissionStatus === "success"
-              ? "Message Sent"
-              : submissionStatus === "error"
-              ? "Error!"
-              : "Send Message"}
+            className={`w-full bg-quaternary text-white py-3 px-6 rounded-md transition-colors hover:bg-opacity-70`}>
+            Send Message
           </button>
         </form>
       </div>
