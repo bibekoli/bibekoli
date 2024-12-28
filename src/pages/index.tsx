@@ -19,6 +19,12 @@ export default function Home() {
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-title" content="MyWebSite" />
         <link rel="manifest" href="/site.webmanifest" />
+
+        <meta name="description" content="I am a Full Stack Developer from Jhapa, Nepal." />
+        <meta property="og:title" content="Bibek Oli - Full Stack Developer" />
+        <meta property="og:description" content="I am a Full Stack Developer from Jhapa, Nepal." />
+        <meta property="og:image" content="/web-app-manifest-512x512.png" />
+        <meta property="og:url" content="https://bibekoli.com" />
       </Head>
       <main className="bg-primary text-quaternary" id="home">
         <Hero />
