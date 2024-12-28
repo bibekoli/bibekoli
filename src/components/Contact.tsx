@@ -116,12 +116,8 @@ export default function Contact() {
         <form
           className="w-full md:w-1/2"
           method="POST"
-          data-netlify="true"
           name="contact"
           onSubmit={handleSubmit}>
-          {/* Hidden input required by Netlify */}
-          <input type="hidden" name="form-name" value="contact" />
-
           <h3 className="text-2xl font-semibold mb-6 text-gray-800">
             Send a Message
           </h3>
