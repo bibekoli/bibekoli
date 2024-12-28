@@ -138,7 +138,7 @@ export default function Contact() {
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-quaternary"
             />
           </div>
 
@@ -156,7 +156,7 @@ export default function Contact() {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-quaternary"
             />
           </div>
 
@@ -173,7 +173,7 @@ export default function Contact() {
               onChange={handleChange}
               rows={5}
               required
-              className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-quaternary"
             />
           </div>
 
@@ -182,7 +182,7 @@ export default function Contact() {
             className={`w-full bg-quaternary text-white py-3 px-6 rounded-md transition-colors ${
               submissionStatus === "pending"
                 ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-blue-600"
+                : "hover:bg-opacity-70"
             }`}
             disabled={submissionStatus === "pending"}>
             {submissionStatus === "pending"
