@@ -1,8 +1,11 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { Roboto_Slab as Font } from "next/font/google";
+import { Space_Grotesk as Font } from "next/font/google";
 
-const font = Font({ subsets: ["latin"] });
+const font = Font({
+  subsets: ["latin"],
+  weight: ["400"],
+});
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
