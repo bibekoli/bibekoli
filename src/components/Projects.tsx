@@ -14,7 +14,7 @@ export default function Projects() {
       name: "EC Admin",
       description: "An admin dashboard for an e-commerce platform to manage products, orders, and users.",
       image: "ec-admin.png",
-      url: "https://ec-admin.bibekoli.com",
+      url: "https://app.arocel.com",
       techStack: ["TypeScript", "Next.js", "MongoDB", "Material UI"]
     },
     {
