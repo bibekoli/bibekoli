@@ -15,7 +15,7 @@ export default function Projects() {
       description: "An admin dashboard for an e-commerce platform to manage products, orders, and users.",
       image: "ec-admin.png",
       url: "https://ec-admin.bibekoli.com",
-      techStack: ["TypeScript, Next.js, MongoDB, Material UI"]
+      techStack: ["TypeScript", "Next.js", "MongoDB", "Material UI"]
     },
     {
       name: "EC Buyer",
