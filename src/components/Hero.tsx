@@ -42,7 +42,7 @@ export default function Hero() {
           transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
           className="bg-white p-1 rounded-full w-max mx-auto mb-4">
           <Image
-            src="/me.png"
+            src="/me.jfif"
             alt="Bibek Oli"
             width={150}
             height={150}
