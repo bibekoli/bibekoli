@@ -26,9 +26,9 @@ export default function Home() {
         <meta property="og:image" content="/web-app-manifest-512x512.png" />
         <meta property="og:url" content="https://bibekoli.com" />
       </Head>
-      <main className="bg-primary text-quaternary" id="home">
+      <main className="bg-secondary text-quaternary min-h-screen" id="home">
         <Hero />
-        <div className="max-w-screen-xl mx-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Navigation />
           <Skills />
           <Projects />

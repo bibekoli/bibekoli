@@ -12,7 +12,9 @@ const config: Config = {
         "primary": "var(--primary)",
         "secondary": "var(--secondary)",
         "tertiary": "var(--tertiary)",
-        "quaternary": "var(--quaternary)"
+        "quaternary": "var(--quaternary)",
+        "accent": "var(--accent)",
+        "accent-hover": "var(--accent-hover)"
       },
     },
   },

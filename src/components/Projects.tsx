@@ -1,5 +1,6 @@
 import Image from "next/image";
 import React from "react";
+import { Icon } from "@iconify/react/dist/iconify.js";
 
 export default function Projects() {
   const projects = [
@@ -48,54 +49,78 @@ export default function Projects() {
   ];
 
   return (
-    <div className="p-4 m-4 bg-white rounded-2xl" id="projects-section">
-      <h1 className="text-3xl font-bold text-center mb-6">Projects</h1>
-      <div className="space-y-8">
-        <div className="grid grid-cols-1 gap-4">
-          {
-            projects.map((project) => (
-              <div
-                key={project.name}
-                className="bg-white rounded-lg overflow-hidden">
-                <div className="flex flex-col md:flex-row">
-                  <Image
-                    width={1280}
-                    height={720}
-                    src={`/${project.image}`}
-                    alt={project.name}
-                    className="w-full md:w-1/2"
-                  />
-                  <div className="p-4 md:w-1/2">
-                    <h2 className="text-lg font-semibold text-gray-800">{project.name}</h2>
-                    <p className="text-gray-600 mt-2">{project.description}</p>
-                    <div className="mt-2">
-                      <p className="text-sm font-semibold text-gray-700 mb-2">Tech Stack</p>
-                      <ul className="flex flex-wrap space-x-1">
-                        {
-                        project.techStack.map((tech, index) => (
-                            <li
-                              key={index}
-                              className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-full">
-                              {tech}
-                            </li>
-                          ))
-                        }
-                      </ul>
-                    </div>
-                    <a
-                      href={project.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-4 inline-block bg-quaternary text-white text-center py-2 px-4 rounded-full hover:bg-primary hover:text-quaternary">
-                      View Project
-                    </a>
+    <section className="py-16 px-4" id="projects-section">
+      <div className="max-w-7xl mx-auto">
+        {/* Section Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl sm:text-5xl font-bold text-quaternary mb-4">
+            Featured Projects
+          </h2>
+          <div className="flex items-center justify-center gap-2">
+            <div className="h-1 w-16 bg-gradient-to-r from-transparent to-accent rounded-full"></div>
+            <p className="text-lg text-tertiary">Things I&apos;ve built</p>
+            <div className="h-1 w-16 bg-gradient-to-l from-transparent to-accent rounded-full"></div>
+          </div>
+        </div>
+
+        {/* Projects Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {projects.map((project, index) => (
+            <div
+              key={project.name}
+              className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-accent/30">
+              {/* Project Image */}
+              <div className="relative h-64 overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50">
+                <Image
+                  width={1280}
+                  height={720}
+                  src={`/${project.image}`}
+                  alt={project.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
+
+              {/* Project Content */}
+              <div className="p-6">
+                <h3 className="text-2xl font-bold text-quaternary mb-3 group-hover:text-accent transition-colors duration-300">
+                  {project.name}
+                </h3>
+                <p className="text-tertiary leading-relaxed mb-4">
+                  {project.description}
+                </p>
+
+                {/* Tech Stack */}
+                <div className="mb-4">
+                  <p className="text-sm font-semibold text-quaternary mb-2">Tech Stack</p>
+                  <div className="flex flex-wrap gap-2">
+                    {project.techStack.map((tech, techIndex) => (
+                      <span
+                        key={techIndex}
+                        className="text-xs font-medium px-3 py-1 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 text-accent border border-accent/20">
+                        {tech}
+                      </span>
+                    ))}
                   </div>
                 </div>
+
+                {/* View Project Button */}
+                <a
+                  href={project.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group/btn inline-flex items-center gap-2 bg-accent text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:bg-accent-hover hover:shadow-lg hover:scale-105">
+                  <span>View Project</span>
+                  <Icon 
+                    icon="akar-icons:arrow-right" 
+                    className="text-lg transition-transform duration-300 group-hover/btn:translate-x-1" 
+                  />
+                </a>
               </div>
-            ))
-          }
+            </div>
+          ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 };

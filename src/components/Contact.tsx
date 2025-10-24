@@ -1,6 +1,15 @@
 import { Icon } from "@iconify/react/dist/iconify.js";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+declare global {
+  interface Window {
+    grecaptcha?: {
+      ready(callback: () => void): void;
+      execute(siteKey: string, options: { action: string }): Promise<string>;
+    };
+  }
+}
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -8,23 +17,123 @@ export default function Contact() {
     email: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRecaptchaReady, setIsRecaptchaReady] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
+
+  const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+
+  useEffect(() => {
+    if (!recaptchaSiteKey) {
+      console.warn("NEXT_PUBLIC_RECAPTCHA_SITE_KEY is not defined.");
+      return;
+    }
+
+    const scriptId = "google-recaptcha-script";
+    if (document.getElementById(scriptId)) {
+      setIsRecaptchaReady(true);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = scriptId;
+    script.src = `https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKey}`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => setIsRecaptchaReady(true);
+    script.onerror = () => {
+      console.error("Failed to load Google reCAPTCHA script.");
+      setIsRecaptchaReady(false);
+    };
+
+    document.body.appendChild(script);
+
+    return () => {
+      // Keep the script for performance; do not remove on unmount
+    };
+  }, [recaptchaSiteKey]);
+
+  const executeRecaptcha = async () => {
+    if (!recaptchaSiteKey) {
+      throw new Error("Missing reCAPTCHA site key.");
+    }
+
+    if (!window.grecaptcha) {
+      throw new Error("reCAPTCHA is not ready yet.");
+    }
+
+    return new Promise<string>((resolve, reject) => {
+      try {
+        window.grecaptcha?.ready(async () => {
+          try {
+            const token = await window.grecaptcha!.execute(recaptchaSiteKey, {
+              action: "contact_form",
+            });
+            resolve(token);
+          } catch (error) {
+            reject(error);
+          }
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
 
   const socialMedia = [
     {
       name: "Facebook",
       icon: "akar-icons:facebook-fill",
-      link: "https://www.facebook.com/bibekoli28",
+      link: "https://www.facebook.com/bibekoliz",
+      bgColor: "from-blue-500 to-blue-600",
+      hoverColor: "hover:from-blue-600 hover:to-blue-700"
+    },
+    {
+      name: "Instagram",
+      icon: "akar-icons:instagram-fill",
+      link: "https://www.instagram.com/bibekoliz",
+      bgColor: "from-pink-500 to-purple-600",
+      hoverColor: "hover:from-pink-600 hover:to-purple-700"
+    },
+    {
+      name: "Twitter",
+      icon: "akar-icons:twitter-fill",
+      link: "https://twitter.com/bibekoliz",
+      bgColor: "from-sky-400 to-blue-500",
+      hoverColor: "hover:from-sky-500 hover:to-blue-600"
     },
     {
       name: "LinkedIn",
       icon: "akar-icons:linkedin-fill",
       link: "https://www.linkedin.com/in/bibekoli",
+      bgColor: "from-blue-600 to-blue-700",
+      hoverColor: "hover:from-blue-700 hover:to-blue-800"
     },
     {
       name: "GitHub",
       icon: "akar-icons:github-fill",
       link: "https://github.com/bibekoli",
+      bgColor: "from-gray-700 to-gray-900",
+      hoverColor: "hover:from-gray-800 hover:to-black"
     },
+  ];
+
+  const contactInfo = [
+    {
+      icon: "material-symbols:alternate-email",
+      label: "Email",
+      value: "hello@bibekoli.com",
+      color: "from-blue-500 to-indigo-500"
+    },
+    {
+      icon: "ic:round-location-on",
+      label: "Location",
+      value: "Kathmandu, Nepal",
+      color: "from-purple-500 to-pink-500"
+    }
   ];
 
   const handleChange = (
@@ -36,128 +145,265 @@ export default function Contact() {
     });
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const mailUrl = `mailto:hello@bibekoli.com?subject=New Message from ${formData.name} (${formData.email})&body=${formData.message}`;
-    window.open(mailUrl);
+    if (!recaptchaSiteKey) {
+      setSubmitStatus({
+        type: "error",
+        message: "reCAPTCHA is not configured. Please contact the administrator.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: "" });
+
+    try {
+      const captchaToken = await executeRecaptcha();
+
+      const response = await fetch("/api/contact-me", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          captchaToken,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitStatus({
+          type: "success",
+          message: "Thank you! Your message has been sent successfully. I'll get back to you soon!",
+        });
+        // Reset form
+        // setFormData({ name: "", email: "", message: "" });
+      } else {
+        setSubmitStatus({
+          type: "error",
+          message: data.details 
+            ? data.details.join(", ")
+            : data.error || "Failed to send message. Please try again.",
+        });
+      }
+    } catch (error) {
+      setSubmitStatus({
+        type: "error",
+        message: "Failed to verify reCAPTCHA. Please reload the page and try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="m-4 p-4 bg-white rounded-2xl" id="contact-section">
-      <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">
-        Contact Me
-      </h2>
-      <div className="flex flex-col md:flex-row items-start justify-between space-y-12 md:space-y-0">
-        {/* Contact Details */}
-        <div className="w-full md:w-1/2">
-          <h3 className="text-2xl font-semibold mb-6 text-gray-800">
-            Get in Touch
-          </h3>
-          <ul className="space-y-4">
-            <li className="flex items-center">
-              <Icon
-                icon="akar-icons:email-fill"
-                className="text-2xl text-blue-500 mr-4"
-              />
-              <span className="text-gray-700">hello@bibekoli.com</span>
-            </li>
-            <li className="flex items-center">
-              <Icon
-                icon="ic:round-location-on"
-                className="text-2xl text-blue-500 mr-4"
-              />
-              <span className="text-gray-700">Budhabare, Jhapa, Nepal</span>
-            </li>
-          </ul>
-          <div className="mt-8">
-            <h4 className="text-xl font-medium mb-4 text-gray-800">
-              Connect with Me
-            </h4>
-            <div className="flex space-x-4">
-              {
-                socialMedia.map((social) => (
+    <section className="py-16 px-4" id="contact-section">
+      <div className="max-w-7xl mx-auto">
+        {/* Section Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl sm:text-5xl font-bold text-quaternary mb-4">
+            Get In Touch
+          </h2>
+          <div className="flex items-center justify-center gap-2">
+            <div className="h-1 w-16 bg-gradient-to-r from-transparent to-accent rounded-full"></div>
+            <p className="text-lg text-tertiary">Let&apos;s work together</p>
+            <div className="h-1 w-16 bg-gradient-to-l from-transparent to-accent rounded-full"></div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+          {/* Left Column: Contact Information & Social Media */}
+          <div className="space-y-6">
+            {/* Contact Information */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+              <h3 className="text-2xl font-bold text-quaternary mb-6">
+                Contact Information
+              </h3>
+              <div className="space-y-6">
+                {contactInfo.map((info, index) => (
+                  <div key={index} className="flex items-start gap-4">
+                    <div className={`flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br ${info.color} flex items-center justify-center shadow-lg`}>
+                      <Icon icon={info.icon} className="text-2xl text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-tertiary mb-1">{info.label}</p>
+                      <p className="text-quaternary font-medium">{info.value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Social Media */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+              <h3 className="text-2xl font-bold text-quaternary mb-6">
+                Connect With Me
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                {socialMedia.map((social) => (
                   <Link
                     key={social.name}
                     href={social.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-700 hover:text-blue-500 transition-colors">
-                    <Icon icon={social.icon} className="text-3xl" />
+                    className={`group relative bg-gradient-to-br ${social.bgColor} ${social.hoverColor} rounded-xl p-4 transition-all duration-300 hover:scale-105 hover:shadow-xl overflow-hidden`}>
+                    {/* Background Pattern */}
+                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
+                    {/* Content */}
+                    <div className="relative flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+                        <Icon icon={social.icon} className="text-2xl text-white" />
+                      </div>
+                      <span className="text-white font-semibold text-sm leading-tight">{social.name}</span>
+                    </div>
                   </Link>
-                ))
-              }
+                ))}
+              </div>
             </div>
           </div>
+
+          {/* Right Column: Contact Form */}
+          <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 h-fit">
+            <h3 className="text-2xl font-bold text-quaternary mb-6">
+              Send a Message
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Status Message */}
+              {submitStatus.type && (
+                <div
+                  className={`p-4 rounded-xl flex items-start gap-3 ${
+                    submitStatus.type === "success"
+                      ? "bg-green-50 border border-green-200"
+                      : "bg-red-50 border border-red-200"
+                  }`}>
+                  <Icon
+                    icon={
+                      submitStatus.type === "success"
+                        ? "heroicons:check-circle"
+                        : "heroicons:x-circle"
+                    }
+                    className={`text-2xl flex-shrink-0 ${
+                      submitStatus.type === "success"
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  />
+                  <p
+                    className={`text-sm ${
+                      submitStatus.type === "success"
+                        ? "text-green-800"
+                        : "text-red-800"
+                    }`}>
+                    {submitStatus.message}
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-semibold text-quaternary mb-2">
+                  Your Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  disabled={isSubmitting}
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-accent focus:outline-none transition-colors duration-300 bg-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-semibold text-quaternary mb-2">
+                  Your Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  disabled={isSubmitting}
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-accent focus:outline-none transition-colors duration-300 bg-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="john@example.com"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="message"
+                  className="block text-sm font-semibold text-quaternary mb-2">
+                  Your Message
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  rows={6}
+                  required
+                  disabled={isSubmitting}
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-accent focus:outline-none transition-colors duration-300 resize-none bg-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="Tell me about your project..."
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting || !isRecaptchaReady}
+                className="w-full bg-accent text-white py-4 px-6 rounded-xl font-semibold transition-all duration-300 hover:bg-accent-hover hover:shadow-lg hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                {isSubmitting ? (
+                  <>
+                    <Icon icon="eos-icons:loading" className="text-xl animate-spin" />
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Send Message</span>
+                    <Icon icon="akar-icons:send" className="text-xl" />
+                  </>
+                )}
+              </button>
+
+              <p className="text-xs text-tertiary/80 text-center leading-relaxed">
+                This site is protected by reCAPTCHA and the Google
+                {" "}
+                <a
+                  href="https://policies.google.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-tertiary underline hover:text-quaternary transition-colors">
+                  Privacy Policy
+                </a>
+                {" "}
+                and
+                {" "}
+                <a
+                  href="https://policies.google.com/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-tertiary underline hover:text-quaternary transition-colors">
+                  Terms of Service
+                </a>
+                {" "}
+                apply.
+              </p>
+            </form>
+          </div>
         </div>
-
-        {/* Contact Form */}
-        <form
-          className="w-full md:w-1/2"
-          method="POST"
-          name="contact"
-          onSubmit={handleSubmit}>
-          <h3 className="text-2xl font-semibold mb-6 text-gray-800">
-            Send a Message
-          </h3>
-          <div className="mb-4">
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-600">
-              Your Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-quaternary"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-600"
-            >
-              Your Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-quaternary"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="message"
-              className="block text-sm font-medium text-gray-600">
-              Your Message
-            </label>
-            <textarea
-              id="message"
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              rows={5}
-              required
-              className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-quaternary"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className={`w-full bg-quaternary text-white py-3 px-6 rounded-md transition-colors hover:bg-opacity-70`}>
-            Send Message
-          </button>
-        </form>
       </div>
-    </div>
+    </section>
   );
 }
