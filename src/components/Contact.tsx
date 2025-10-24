@@ -180,7 +180,7 @@ export default function Contact() {
           message: "Thank you! Your message has been sent successfully. I'll get back to you soon!",
         });
         // Reset form
-        // setFormData({ name: "", email: "", message: "" });
+        setFormData({ name: "", email: "", message: "" });
       } else {
         setSubmitStatus({
           type: "error",
