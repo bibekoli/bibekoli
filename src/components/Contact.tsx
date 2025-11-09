@@ -1,6 +1,7 @@
 import { Icon } from "@iconify/react/dist/iconify.js";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useToast } from "./ui/Toast";
 
 declare global {
   interface Window {
@@ -19,10 +20,7 @@ export default function Contact() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRecaptchaReady, setIsRecaptchaReady] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<{
-    type: "success" | "error" | null;
-    message: string;
-  }>({ type: null, message: "" });
+  const { showToast } = useToast();
 
   const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
@@ -148,15 +146,15 @@ export default function Contact() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!recaptchaSiteKey) {
-      setSubmitStatus({
+      showToast({
         type: "error",
-        message: "reCAPTCHA is not configured. Please contact the administrator.",
+        title: "reCAPTCHA not configured",
+        description: "Please contact the administrator.",
       });
       return;
     }
 
     setIsSubmitting(true);
-    setSubmitStatus({ type: null, message: "" });
 
     try {
       const captchaToken = await executeRecaptcha();
@@ -175,24 +173,30 @@ export default function Contact() {
       const data = await response.json();
 
       if (response.ok) {
-        setSubmitStatus({
+        showToast({
           type: "success",
-          message: "Thank you! Your message has been sent successfully. I'll get back to you soon!",
+          title: "Message sent",
+          description:
+            "Thank you! Your message has been sent successfully. I'll get back to you soon!",
         });
         // Reset form
         setFormData({ name: "", email: "", message: "" });
       } else {
-        setSubmitStatus({
+        showToast({
           type: "error",
-          message: data.details 
-            ? data.details.join(", ")
-            : data.error || "Failed to send message. Please try again.",
+          title: "Failed to send",
+          description:
+            data.details
+              ? data.details.join(", ")
+              : data.error || "Failed to send message. Please try again.",
         });
       }
     } catch (error) {
-      setSubmitStatus({
+      showToast({
         type: "error",
-        message: "Failed to verify reCAPTCHA. Please reload the page and try again.",
+        title: "reCAPTCHA error",
+        description:
+          "Failed to verify reCAPTCHA. Please reload the page and try again.",
       });
     } finally {
       setIsSubmitting(false);
@@ -273,35 +277,7 @@ export default function Contact() {
             </h3>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Status Message */}
-              {submitStatus.type && (
-                <div
-                  className={`p-4 rounded-xl flex items-start gap-3 ${
-                    submitStatus.type === "success"
-                      ? "bg-green-50 border border-green-200"
-                      : "bg-red-50 border border-red-200"
-                  }`}>
-                  <Icon
-                    icon={
-                      submitStatus.type === "success"
-                        ? "heroicons:check-circle"
-                        : "heroicons:x-circle"
-                    }
-                    className={`text-2xl flex-shrink-0 ${
-                      submitStatus.type === "success"
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  />
-                  <p
-                    className={`text-sm ${
-                      submitStatus.type === "success"
-                        ? "text-green-800"
-                        : "text-red-800"
-                    }`}>
-                    {submitStatus.message}
-                  </p>
-                </div>
-              )}
+              
 
               <div>
                 <label
