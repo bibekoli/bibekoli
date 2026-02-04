@@ -62,6 +62,9 @@ export default function Skills() {
         { name: "Apollo Server", icon: "logos:apollostack" },
         { name: "NextAuth.js", icon: "simple-icons:nextdotjs" },
         { name: "Postman", icon: "vscode-icons:file-type-postman" },
+        { name: "Jenkins", icon: "logos:jenkins" },
+        { name: "CI/CD", icon: "heroicons:arrow-path" },
+        { name: "NGINX", icon: "logos:nginx" },
       ]
     },
     {
