@@ -159,7 +159,9 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.5 }}
               className="text-lg text-tertiary leading-relaxed mb-8 max-w-xl mx-auto lg:mx-0">
-              I craft beautiful, performant, and accessible web applications with modern technologies. 
+              {/* I craft beautiful, performant, and accessible web applications with modern technologies. 
+              Passionate about creating seamless user experiences and solving complex problems. */}
+              Full Stack Developer with 5+ years of experience building scalable end-to-end applications using MERN Stack, Next.js, and modern backend architectures.
               Passionate about creating seamless user experiences and solving complex problems.
             </motion.p>
 
