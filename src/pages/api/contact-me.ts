@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { validateRecaptchaToken } from "@/lib/recaptcha";
-import { saveContactSubmission } from "@/lib/mongodb";
+import { saveContactSubmission, getCaptchaTokenUsageCount } from "@/lib/mongodb";
 
 type ContactRequestBody = {
   name?: string;
@@ -17,10 +17,10 @@ export default async function ContactMe(req: NextApiRequest, res: NextApiRespons
 
   const { name, email, message, captchaToken } = (req.body ?? {}) as ContactRequestBody;
 
-  if (!name || !email || !message) {
+  if (!name || !email || !message || !captchaToken) {
     return res.status(400).json({
       error: "Missing required fields.",
-      details: ["name", "email", "message"].filter((field) => !(req.body ?? {})[field as keyof ContactRequestBody]).map((field) => `${field} is required`),
+      details: ["name", "email", "message", "captchaToken"].filter((field) => !(req.body ?? {})[field as keyof ContactRequestBody]).map((field) => `${field} is required`),
     });
   }
 
@@ -30,6 +30,11 @@ export default async function ContactMe(req: NextApiRequest, res: NextApiRespons
 
   if (!validationResult.success) {
     return res.status(validationResult.status).json(validationResult.body);
+  }
+
+  const usageCount = await getCaptchaTokenUsageCount(captchaToken!);
+  if (usageCount >= 3) {
+    return res.status(400).json({ error: "Captcha token has been used too many times." });
   }
 
   try {

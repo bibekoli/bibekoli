@@ -55,3 +55,12 @@ export async function saveContactSubmission(submission: {
 
   return { acknowledged, insertedId };
 }
+
+export async function getCaptchaTokenUsageCount(captchaToken: string): Promise<number> {
+  const client = await getMongoClient();
+  const db = client.db(dbName);
+  const collection = db.collection("contact_submissions");
+
+  const count = await collection.countDocuments({ captchaToken });
+  return count;
+}
